@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Management</title>
+  <!-- Keeping your original stylesheet link intact -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Dark Mysterious Cinematic Theme */
+    :root {
+      --bg-dark: #0a0a0f;
+      --panel-bg: rgba(16, 16, 24, 0.75);
+      --neon-cyan: #00f3ff;
+      --neon-magenta: #ff0055;
+      --text-glow: 0 0 10px rgba(0, 243, 255, 0.5);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      font-family: 'Courier New', Courier, monospace;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Dynamic Particle Background Canvas */
+    #ambientCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Cinematic Heading */
+    h1 {
+      font-size: 2.2rem;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: var(--neon-cyan);
+      text-shadow: var(--text-glow), 0 0 20px rgba(0, 243, 255, 0.2);
+      z-index: 1;
+      margin-bottom: 30px;
+      animation: pulseGlow 4s infinite ease-in-out;
+      text-align: center;
+    }
+
+    /* Glassmorphism Interactive Panel */
+    #studentForm {
+      background: var(--panel-bg);
+      padding: 40px;
+      border-radius: 16px;
+      border: 1px solid rgba(0, 243, 255, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 243, 255, 0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 320px;
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    #studentForm:hover {
+      border-color: rgba(255, 0, 85, 0.4);
+      box-shadow: 0 25px 60px rgba(255, 0, 85, 0.15), inset 0 0 25px rgba(255, 0, 85, 0.05);
+      transform: translateY(-5px);
+    }
+
+    /* Dynamic Input Fields */
+    input[type="text"] {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px 16px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+    }
+
+    input[type="text"]::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.25), inset 0 0 10px rgba(0, 243, 255, 0.1);
+      background: rgba(0, 243, 255, 0.03);
+    }
+
+    /* Interactive Moving Button */
+    button[type="submit"] {
+      background: linear-gradient(135deg, var(--neon-cyan), #00a8ff);
+      border: none;
+      padding: 16px;
+      border-radius: 8px;
+      color: #000;
+      font-weight: bold;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+    }
+
+    button[type="submit"]:hover {
+      background: linear-gradient(135deg, var(--neon-magenta), #cc0044);
+      color: #fff;
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
+      letter-spacing: 3px;
+    }
+
+    button[type="submit"]:active {
+      transform: scale(0.96);
+    }
+
+    /* Scanner Scanline Overlay Effect */
+    #studentForm::after {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 243, 255, 0.08) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 2;
+      background-size: 100% 4px, 3px 100%;
+      pointer-events: none;
+      border-radius: 16px;
+    }
+
+    /* Core Animations */
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 243, 255, 0.4)); opacity: 0.9; }
+      50% { filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.8)); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<!-- Interactive Moving Matrix Background -->
+<canvas id="ambientCanvas"></canvas>
+
+<h1>Student Management System</h1>
+
+<form id="studentForm">
+  <input type="text" id="name" placeholder="Student Name" required>
+  <input type="text" id="roll" placeholder="Roll Number" required>
+  <button type="submit">Add Student</button>
+</form>
+
+<script>
+// --- Ambient Dynamic Background Simulation ---
+const canvas = document.getElementById('ambientCanvas');
+const ctx = canvas.getContext('2d');
+
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+});
+
+class Particle {
+    constructor() {
+        this.reset();
+    }
+    reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedY = Math.random() * 0.8 + 0.2;
+        this.color = Math.random() > 0.85 ? 'rgba(255, 0, 85, 0.3)' : 'rgba(0, 243, 255, 0.15)';
+    }
+    update() {
+        this.y -= this.speedY;
+        if (this.y < 0) this.reset();
+    }
+    draw() {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+const particles = Array.from({ length: 65 }, () => new Particle());
+
+function animate() {
+    ctx.clearRect(0, 0, width, height);
+    particles.forEach(p => {
+        p.update();
+        p.draw();
+    });
+    requestAnimationFrame(animate);
+}
+animate();
+
+// --- Mouse Interaction Parallax effect ---
+document.addEventListener('mousemove', (e) => {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+    
+    document.getElementById('studentForm').style.transform = `translate(${dx * 12}px, ${dy * 12}px) translateY(-5px)`;
+});
+
+// --- Your Original Structural Logic (Untouched) ---
+document.getElementById("studentForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const roll = document.getElementById("roll").value;
+
+    await fetch("http://localhost:5000/addStudent", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, roll })
+    });
+
+    alert("Student Added");
+});
+</script>
+
+</body>
+</html>
